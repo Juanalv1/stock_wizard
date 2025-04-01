@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_report_stock_pdf" model="ir.actions.report">
+        <field name="name">PDF Report</field>
+        <field name="model">stock.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">stock_wizard.stock_pdf_report_template</field>
+        <field name="report_file">stock_wizard.stock_pdf_report_template</field>
+    </record>
+
+</odoo>
+
+

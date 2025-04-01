@@ -10,9 +10,14 @@
           <field name="fecha_inicio"/>
           <field name="fecha_fin"/>
           <field name="compania"/>
-          <field name="almacen"/>
-          <field name="productos"/>
+          <field name="almacen_relacionado"/>
+          <field name="product"/>
+          <field name="report_type"/>
         </group>
+        <footer>
+          <button string="Generate Report" type="object" name="generate_report" class="btn-primary"/>
+          <button string="Cancel" class="btn-secondary" special="cancel"/>
+        </footer>
       </form>
     </field>
   </record>

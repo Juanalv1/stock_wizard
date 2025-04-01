@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="stock_pdf_report_template">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <div class="oe_structure"/>
+                    <div class="">
+                        <span class="bold">Fecha de impresion: </span>
+                        <span class ="bold" t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"/>
+                     </div>
+                           
+                    <div class="text-center">
+                        <h1>Stock Report</h1>
+                    </div>
+                    
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Referencia</th>
+                                    <th>Producto</th>
+                                    <th>Desde Ubicación</th>
+                                    <th>Hacia Ubicación</th>
+                                    <th>Cantidad</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="docs" t-as="move">
+                                    <tr>
+                                        <td><t t-esc="move['date']"/></td>
+                                        <td><t t-esc="move['reference']"/></td>
+                                        <td><t t-esc="move['product_name']"/></td>
+                                        <td><t t-esc="move['from_location']"/></td>
+                                        <td><t t-esc="move['to_location']"/></td>
+                                        <td><t t-esc="move['quantity']"/></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    
+                 </div>
+                <div class="footer" style="position:absolute; margin:0px; padding:0px">
+                    <span class="page"/>/<span class="topage"/>
+                </div>
+            </t>
+        </t>
+    </template>
+
+</odoo>

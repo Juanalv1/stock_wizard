@@ -6,10 +6,17 @@
 
     'data': [
         'security/ir.model.access.csv',
-        'wizard/stock_wizard.xml',
+        'report/pdf_report_template.xml',
+        'report/report.xml',
+        'wizard/stock_wizard_view.xml',
         'views/stock_menu_view.xml',
-
     ],
+    'assets': {
+        'web.assets_backend': [
+            'stock_wizard/static/src/js/action_manager.js',
+        ],
+    },
+    
     'installable': True,
     'application': True,
     'sequence': 220,
