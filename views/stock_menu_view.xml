@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<menuitem
+  id="stock_wizard_menu"
+  name="Wizard"
+  action="display_wizard_action"
+  parent="stock.menu_warehouse_report"
+  sequence="10"/>
+
+</odoo>

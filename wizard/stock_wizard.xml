@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="stock_wizard" model="ir.ui.view">
+    <field name="name">Stock Wizard</field>
+    <field name="model">stock.wizard</field>
+    <field name="arch" type="xml">
+      <form string="Data">
+        <group>
+          <field name="fecha_inicio"/>
+          <field name="fecha_fin"/>
+          <field name="compania"/>
+          <field name="almacen"/>
+          <field name="productos"/>
+        </group>
+      </form>
+    </field>
+  </record>
+
+  <record id="display_wizard_action" model="ir.actions.act_window">
+    <field name="name">Wizard</field>
+    <field name="res_model">stock.wizard</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="stock_wizard"/>
+    <field name="target">new</field>
+  </record>
+
+</odoo>
