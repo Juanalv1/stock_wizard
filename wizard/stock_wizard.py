@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 from odoo import fields, models, api
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tools import date_utils
 import calendar
 import json
@@ -28,60 +28,63 @@ class StockWizard(models.TransientModel):
 
     fecha_inicio = fields.Date(string="Fecha Inicio", default=_default_fecha_inicio, help="Fecha de inicio del periodo a consultar.")
     fecha_fin = fields.Date(string="Fecha Fin", default=_default_fecha_fin, help="Fecha de fin del periodo a consultar.")   
-    compania = fields.Many2one("res.company", string="Compañía", help="Compañía a consultar.", default=lambda self: self.env.company)
-    almacen_relacionado = fields.Many2one("stock.warehouse", string="Almacén", help="Almacén a consultar.", default=lambda self: self.env['stock.warehouse'].search([], limit=1))
-    product = fields.Many2one("product.product", string="Producto", help="Producto a consultar.", default=lambda self: self.env['product.product'].search([], limit=1))
+    compania = fields.Many2many("res.company", string="Compañía", help="Compañía a consultar.", default=lambda self: self.env.company)
+    almacen_relacionado = fields.Many2many("stock.warehouse", string="Almacén", help="Almacén a consultar.", default=lambda self: self.env['stock.warehouse'].search([], limit=1))
+    product = fields.Many2many("product.product", string="Producto", help="Producto a consultar.", default=lambda self: self.env['product.product'].search([], limit=1))
     report_type = fields.Selection([
         ('pdf', 'PDF'),
         ('xlsx', 'XLSX')
     ], string="Formato del reporte", default='pdf', help="Formato del reporte a generar.", required=True)
 
+
     def generate_report(self):
         domain = [
             ('date', '>=', self.fecha_inicio),
             ('date', '<=', self.fecha_fin),
-            ('company_id', '=', self.compania.id),
-            ('product_id', '=', self.product.id),
+            ('company_id', 'in', self.compania.ids),
+            ('product_id', 'in', self.product.ids),
             '|',
-            ('location_id.warehouse_id', '=', self.almacen_relacionado.id),
-            ('location_dest_id.warehouse_id', '=', self.almacen_relacionado.id),
+            ('location_id.warehouse_id', 'in', self.almacen_relacionado.ids),
+            ('location_dest_id.warehouse_id', 'in', self.almacen_relacionado.ids),
 
         ] 
         # Buscar en stock.move.line los registros dentro del rango de fechas
         stock_moves = self.env['stock.move.line'].search(domain)
-        stock_moves_data = []
-
-        for move in stock_moves:
-            # Obtener los datos necesarios de cada movimiento
-            move_data = {
-                'date': move.date,
-                'reference': move.reference,
-                'product_name': move.product_id.name,
-                'from_location': move.location_id.display_name,
-                'to_location': move.location_dest_id.display_name,
-                'quantity': move.quantity,
-            }
-            stock_moves_data.append(move_data)
-            
-        if self.report_type =='pdf':
-            return self.env.ref('stock_wizard.action_report_stock_pdf').report_action(self, data={'stock_moves_data': stock_moves_data})
-        elif self.report_type == 'xlsx':
-            return {
-                'type': 'ir.actions.report',
-                'data': {
-                    'model': 'stock.wizard',
-                    'options': json.dumps(stock_moves_data, default=str),
-                    'output_format': 'xlsx',
-                    'report_name': 'Stock Report'
-                },
-                'report_type': 'xlsx',
-            }
+        if not stock_moves:
+            raise ValidationError("No se encontraron registros con los filtros seleccionados")
+        else:  
+            stock_moves_data = []
+            for move in stock_moves:
+                # Obtener los datos necesarios de cada movimiento
+                move_data = {
+                    'date': move.date,
+                    'reference': move.reference,
+                    'product_name': move.product_id.name,
+                    'from_location': move.location_id.display_name,
+                    'to_location': move.location_dest_id.display_name,
+                    'quantity': move.quantity,
+                }
+                stock_moves_data.append(move_data)
+                
+            if self.report_type =='pdf':
+                return self.env.ref('stock_wizard.action_report_stock_pdf').report_action(self, data={'stock_moves_data': stock_moves_data})
+            elif self.report_type == 'xlsx':
+                return {
+                    'type': 'ir.actions.report',
+                    'data': {
+                        'model': 'stock.wizard',
+                        'options': json.dumps(stock_moves_data, default=str),
+                        'output_format': 'xlsx',
+                        'report_name': 'Stock Report'
+                    },
+                    'report_type': 'xlsx',
+                }
         
     def get_xlsx_report(self, data, response):
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output, {'in_memory': True})
         sheet = workbook.add_worksheet("Stock Report")
-        bold = workbook.add_format({'bold': True})
+        # Formato para los headers
         header_format = workbook.add_format({
             'bg_color': '#0000FF',  # Azul
             'color': 'white',       # Blanco
@@ -94,9 +97,12 @@ class StockWizard(models.TransientModel):
         headers = ["Fecha", "Referencia", "Producto", "Ubicación Origen", "Ubicación Destino", "Cantidad"]
         for col, header in enumerate(headers):
             sheet.write(0, col, header, header_format )
+        # Crea los headers y le aplica los estilos del formato
 
         # Datos
         row = 1
+
+        # Setea el tamaño personalizado de las columnas
         sheet.set_column('A:A', 20)
         sheet.set_column('B:B', 20)
         sheet.set_column('C:C', 20)
@@ -104,7 +110,7 @@ class StockWizard(models.TransientModel):
         sheet.set_column('E:E', 50)
         sheet.set_column('F:F', 10)
 
-        
+        # Es como un json.parse() para decodificar los datos en una lista de python 
         stock_moves_data = json.loads(data['options'])
         for move in stock_moves_data:
             sheet.write(row, 0, str(move.get('date', '')))

@@ -26,10 +26,10 @@ registry.category("ir.actions.report handlers").add("xlsx", async (action) => {
             await download({
                 url: '/xlsx_reports',  // URL del controlador que genera el reporte
                 data: {
-                    model: 'stock.wizard',  // Modelo de los datos que se deben incluir en el reporte
+                    model: action.model,  // Modelo de los datos que se deben incluir en el reporte
                     options: JSON.stringify(action.data),  // Datos del reporte serializados en formato JSON
                     output_format: 'xlsx',  // Formato de salida del reporte
-                    report_name: 'Stock Report',  // Nombre del reporte generado
+                    report_name: action.report_name,  // Nombre del reporte generado
                 },
             });
         } catch (error) {

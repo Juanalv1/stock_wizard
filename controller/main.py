@@ -55,10 +55,9 @@ class XLSXReportController(http.Controller):
                 report_obj.get_xlsx_report(options, response)
                 return response
         except Exception as e:
-            se = http.serialize_exception(e)
             error = {
                 'code': 200,
                 'message': 'Odoo Server Error',
-                'data': se
+                'data': e
             }
             return request.make_response(html_escape(json.dumps(error)))

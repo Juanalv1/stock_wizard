@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+  <record id="stock_wizard.group_admin_warehouse" model="res.groups">
+    <field name="name">Administrador de Almacenes</field>
+    <field name="category_id" ref="base.module_category_inventory"/>
+  </record>
+  
   <record id="stock_wizard" model="ir.ui.view">
     <field name="name">Stock Wizard</field>
     <field name="model">stock.wizard</field>
@@ -9,9 +14,9 @@
         <group>
           <field name="fecha_inicio"/>
           <field name="fecha_fin"/>
-          <field name="compania"/>
-          <field name="almacen_relacionado"/>
-          <field name="product"/>
+          <field name="compania" widget="many2many_tags"/>
+          <field name="almacen_relacionado" widget="many2many_tags" groups="stock_wizard.group_admin_warehouse"/>
+          <field name="product" widget="many2many_tags"/>
           <field name="report_type"/>
         </group>
         <footer>
